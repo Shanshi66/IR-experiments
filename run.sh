@@ -1,0 +1,43 @@
+python rerank.py Corel1k 100 1000 hsv 1 32
+python rerank.py Corel1k 100 1000 hsv 1 34
+python rerank.py Corel1k 100 1000 hsv 1 36
+python rerank.py Corel1k 100 1000 hsv 1 38
+python rerank.py Corel1k 100 1000 hsv 1 40
+python rerank.py Corel1k 100 1000 hsv 1 42
+python rerank.py Corel1k 100 1000 hsv 1 44
+python rerank.py Corel1k 100 1000 hsv 1 46
+python rerank.py Corel1k 100 1000 hsv 1 48
+python rerank.py Corel1k 100 1000 hsv 1 50
+
+python rerank.py Corel1k 100 1000 msd 1 32
+python rerank.py Corel1k 100 1000 msd 1 34
+python rerank.py Corel1k 100 1000 msd 1 36
+python rerank.py Corel1k 100 1000 msd 1 38
+python rerank.py Corel1k 100 1000 msd 1 40
+python rerank.py Corel1k 100 1000 msd 1 42
+python rerank.py Corel1k 100 1000 msd 1 44
+python rerank.py Corel1k 100 1000 msd 1 46
+python rerank.py Corel1k 100 1000 msd 1 48
+python rerank.py Corel1k 100 1000 msd 1 50
+
+python rerank.py Corel1k 100 1000 cdh 1 32
+python rerank.py Corel1k 100 1000 cdh 1 34
+python rerank.py Corel1k 100 1000 cdh 1 36
+python rerank.py Corel1k 100 1000 cdh 1 38
+python rerank.py Corel1k 100 1000 cdh 1 40
+python rerank.py Corel1k 100 1000 cdh 1 42
+python rerank.py Corel1k 100 1000 cdh 1 44
+python rerank.py Corel1k 100 1000 cdh 1 46
+python rerank.py Corel1k 100 1000 cdh 1 48
+python rerank.py Corel1k 100 1000 cdh 1 50
+
+python rerank.py Corel1k 100 1000 tcd2 1 32
+python rerank.py Corel1k 100 1000 tcd2 1 34
+python rerank.py Corel1k 100 1000 tcd2 1 36
+python rerank.py Corel1k 100 1000 tcd2 1 38
+python rerank.py Corel1k 100 1000 tcd2 1 40
+python rerank.py Corel1k 100 1000 tcd2 1 42
+python rerank.py Corel1k 100 1000 tcd2 1 44
+python rerank.py Corel1k 100 1000 tcd2 1 46
+python rerank.py Corel1k 100 1000 tcd2 1 48
+python rerank.py Corel1k 100 1000 tcd2 1 50
