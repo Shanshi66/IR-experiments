@@ -6,6 +6,7 @@ from GraphBuilder import GraphBuilder
 import utility as ut
 import numpy as np
 import os
+import sys
 
 DATASET = 'Data/Image'
 FEATURE = 'Data/ImageFeature'
@@ -161,28 +162,37 @@ def useDeepJaccardGraph(graph_folder, feature, rank, level = 3, k = 6, total = 1
     return graph
 
 if __name__ == '__main__':
+
+    data_set = sys.argv[1]
+    each_class = int(sys.argv[2])
+    total = int(sys.argv[3])
+    feature = sys.argv[4]
+    level = int(sys.argv[5])
+    k = int(sys.argv[6])
+
+
     haveNormalized = 'Unnormalized'
     norm = 'L1'
     # data_set = 'Coil100'
-    data_set = 'Corel1k'
+    # data_set = 'Corel1k'
     # data_set = 'UK'
     DATA_FOLDER = DATASET + '/%s/%s/%s/' % (haveNormalized, norm, data_set)
     GRAPH_FOLDER = DATASET + '/%s/%s/GraphDeepJaccard/' % (haveNormalized, norm)
     DASHENG_GRAPH_FOLDER = DATASET + '/%s/Graph_DaSheng/' % haveNormalized
     
-    each_class = 100
+    # each_class = 100
     # each_class = 72
     # each_class = 4
-    total = 1000
+    # total = 10000
     # total = 7200
     # total = 10200
 
-    feature = 'hsv'
+    # feature = 'msd'
     # method = 'TTNG'
     method = 'LSSM'
-    level = 3
-    k = 8
-    query_len = 10
+    # level = 2
+    # k = 9
+    query_len = 1
 
     
     rank_file = DATA_FOLDER + 'rank_%s.txt' % feature
