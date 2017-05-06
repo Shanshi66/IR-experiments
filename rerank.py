@@ -7,6 +7,8 @@ import utility as ut
 import numpy as np
 import os
 import sys
+from matplotlib import pyplot as plt
+import csv
 
 DATASET = 'Data/Image'
 FEATURE = 'Data/ImageFeature'
@@ -38,6 +40,35 @@ def computeAccuracy(rank, k, class_num):
             if img / class_num == rank[img][i] / class_num: count += 1
         accuracy.append(float(count) / k)
     return sum(accuracy) / len(accuracy)
+
+def computeAccuracySingle(img, ranklist, k, class_num):
+    count = 0
+    for i in range(k):
+        if img / class_num == ranklist[i] / class_num: count += 1
+    return float(count) / k
+
+def evaluateSingle(rank, rerank, K, class_num, data_set):
+    improvements = []
+    for img in rank:
+        rank_accuracy = computeAccuracySingle(img, rank[img], K, class_num)
+        rerank_accuracy = computeAccuracySingle(img, rerank[img], K, class_num)
+        
+        if data_set == 'UK': 
+            rerank_accuracy = rerank_accuracy * 4
+            rank_accuracy = rank_accuracy * 4
+        else:
+            rerank_accuracy = rerank_accuracy * 100
+            rank_accuracy = rank_accuracy * 100
+
+        improvement = rerank_accuracy - rank_accuracy
+        
+        # if improvement <= 0 and rank_accuracy != 100:
+        # # if improvement > 0:
+        #     print '%d\t%.2f\t%.2f\t%.2f' % (img, rank_accuracy, rerank_accuracy, improvement)
+        improvements.append(improvement)
+    with open('improvement.csv', 'w') as f:
+        for i, t in enumerate(improvements):
+            f.write('%d,%d\n' % (i, t))
 
 def evaluate(rank, rerank, K, class_num, data_set, first_k):
     if not first_k:
@@ -147,8 +178,7 @@ def loadFeature(feature_path):
     feature = readCSV(feature_path)
     return feature
 
-def useDeepJaccardGraph(graph_folder, feature, rank, level = 3, k = 6, total = 10000):
-    graph_path = GRAPH_FOLDER + '%s-%s-graph-%d-%d.pickle' % (data_set, feature, level, k)
+def useDeepJaccardGraph(graph_path, rank, level = 3, k = 6, total = 10000):
     if os.path.exists(graph_path):
         graph = ut.loadObj(graph_path)
     else:
@@ -161,37 +191,42 @@ def useDeepJaccardGraph(graph_folder, feature, rank, level = 3, k = 6, total = 1
         # graph = graph_builder.buildDistGraph(rank, dist)
     return graph
 
-if __name__ == '__main__':
-
-    data_set = sys.argv[1]
-    each_class = int(sys.argv[2])
-    total = int(sys.argv[3])
-    feature = sys.argv[4]
-    level = int(sys.argv[5])
-    k = int(sys.argv[6])
+def getRerank():
+    # data_set = sys.argv[1]
+    # each_class = int(sys.argv[2])
+    # total = int(sys.argv[3])
+    # feature = sys.argv[4]
+    # level = int(sys.argv[5])
+    # k = int(sys.argv[6])
+    # query_len = int(sys.argv[7])
 
 
     haveNormalized = 'Unnormalized'
     norm = 'L1'
     # data_set = 'Coil100'
-    # data_set = 'Corel1k'
+    # data_set = 'Corel10k'
+    data_set = 'Corel1k'
     # data_set = 'UK'
     DATA_FOLDER = DATASET + '/%s/%s/%s/' % (haveNormalized, norm, data_set)
     GRAPH_FOLDER = DATASET + '/%s/%s/GraphDeepJaccard/' % (haveNormalized, norm)
     DASHENG_GRAPH_FOLDER = DATASET + '/%s/Graph_DaSheng/' % haveNormalized
     
-    # each_class = 100
+    each_class = 100
     # each_class = 72
     # each_class = 4
     # total = 10000
+    total = 1000
     # total = 7200
     # total = 10200
 
+    # feature = 'tcd2'
+    # feature = 'cdh'
     # feature = 'msd'
+    feature = 'hsv'
     # method = 'TTNG'
     method = 'LSSM'
-    # level = 2
-    # k = 9
+    level = 3
+    k = 8
     query_len = 1
 
     
@@ -200,12 +235,13 @@ if __name__ == '__main__':
     rank = loadRank(rank_file)
     
     if method == 'LSSM':
-        graph = useDeepJaccardGraph(GRAPH_FOLDER, feature, rank, level = level, k = k, total = total)
+        graph_path = GRAPH_FOLDER + '%s-%s-graph-%d-%d.pickle' % (data_set, feature, level, k)
+        graph = useDeepJaccardGraph(graph_path, rank, level = level, k = k, total = total)
     else:
         graph_path = DASHENG_GRAPH_FOLDER + '%s-%s.pickle' % (data_set, feature)
         graph = useDashengGraph(graph_path)
     
-    K = 30
+    K = 20
 
     print '-'*50
     print '%s %s \t %s \t %s \t %s' % (haveNormalized, norm, data_set, feature, method)
@@ -213,33 +249,14 @@ if __name__ == '__main__':
         print 'level: %d' % level
         print '    k: %d' % k
     print 'query: %d' % query_len
-    print '-'*50
+    print '-' * 50
 
     # query = extendQuery(graph, query_len)
-    # query = extendQuery_2(graph, query_len)
-    # rerank = iterativeRerank(query, graph, K = K)
-    # evaluate(rank, rerank, K, each_class, data_set)
+    query = extendQuery_2(graph, query_len)
+    rerank = iterativeRerank(query, graph, K = K)
+    evaluate(rank, rerank, K, each_class, data_set, [])
+    evaluateSingle(rank, rerank, K, each_class, data_set)
 
-    firstKs = [12, 20, 30]
-    # firstKs = [4]
-    print '\t'.join([str(x) for x in firstKs])
-    origin = []
-    for i in firstKs:
-        accuracy = computeAccuracy(rank, i, each_class)
-        if data_set == 'UK': 
-            accuracy *= 4
-        else:
-            accuracy *= 100
-        origin.append(round(accuracy, 2))
-    print '\t'.join([ str(x) for x in origin ])
-    print
-    for i in range(1, query_len + 1):
-        query = extendQuery_2(graph, i)
-        # query = extendQuery(graph, i)
-        rerank = iterativeRerank(query, graph, K = K)
-        # result = evaluate(rank, rerank, K, each_class, data_set, [])
-        result = evaluate(rank, rerank, K, each_class, data_set, firstKs)
-        result = '\t'.join([ str(x) for x in result ])
-        print result
-
-
+if __name__ == '__main__':
+    # rerank()
+    getRerank()
