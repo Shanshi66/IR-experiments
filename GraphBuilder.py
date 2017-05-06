@@ -7,6 +7,7 @@ import pickle
 import sys
 from progressbar import *
 import time
+from matplotlib import pyplot as plt
 
 class GraphBuilder:
 
@@ -74,33 +75,59 @@ class GraphBuilder:
         # print len(visit)
         return knn
 
+    def bfsDistRepeat(self, rank, img, level = 2, k = 10):
+        current_level = [img]
+        next_level = []
+        knn = []
+        for i in range(level):
+            for t in current_level:
+                knn.append(t)
+                for s in rank[t][0 : k]:
+                    next_level.append(s)
+            current_level = next_level
+            next_level = []
+        return knn
+
+    def findIndex(self, img, ranklist):
+        if img in ranklist:
+            return ranklist.index(img)
+        else:
+            return len(ranklist)
+
     def buildDeepJaccardGraph(self, rank, level = 2, k = 10):
         start_time = time.time()
         pbar = ProgressBar().start()
         graph = {}
-        average_set_size = 0
         for img in rank:
             pbar.update(float(img) / self.total * 100)
             graph[img] = {}
             for candidate in rank[img][0:200]:
                 set_a = self.bfs_dist(rank, img, level, k)
-                set_b = self.bfs_dist(rank, candidate, level, k)
                 len_a = len(set_a)
+                set_b = self.bfs_dist(rank, candidate, level, k)
                 len_b = len(set_b)
-                # print len_a, len_b
                 if len_a > min(len_a, len_b):
                     set_a = set_a[0 : min(len_a, len_b)]
                 if len_b > min(len_a, len_b):
                     set_b = set_b[0 : min(len_a, len_b)]
-                average_set_size += len(set_a)
                 # print len(set_a), len(set_b)
-                graph[img][candidate] = self.calculateJaccard(set_a, set_b)
-                #print len(set_a), len(set_b)
+                index_a = self.findIndex(candidate, rank[img][0:200]) + 1.0
+                index_b = self.findIndex(img, rank[candidate][0:200]) + 1.0
+                # total_order = max(index_a, index_b) + 1.0
+                # total_order = np.exp((index_a + index_b) / 400.0)
+                # total_order = (200 - index_a) * (200 - index_b) / (400 - index_a - index_b + 1.0) / 200.0
+                total_order = index_a + index_b
+                if total_order < 10: total_order = total_order / 400.0
+                else: total_order = np.exp(total_order / 400.0)
+                # if disorder > 120: continue
+                graph[img][candidate] = self.calculateJaccard(set_a, set_b) / total_order
+                # graph[img][candidate] = self.calculateJaccard(set_a, set_b)
+                # graph[img][candidate] = total_order
+
         ut.dumpObj(graph, self.graph_path)
         pbar.finish()
-        print average_set_size / len(rank) / 200
         end_time = time.time()
-        print 'It takes %ds to build graph' % (end_time - start_time) 
+        print 'It takes %ds to build graph' % (end_time - start_time)
         return graph
 
     def buildDistGraph(self, rank, dist):
@@ -112,10 +139,20 @@ class GraphBuilder:
             if img == 1: 
                 print graph[img]
         return graph
+    
+    def calculateJaccard2(self, s1, s2):
+        ss1 = set(s1)
+        ss2 = set(s2)
+        count = 0
+        for s in s1:
+            if s in ss2: count += 1
+        for s in s2:
+            if s in ss1: count += 1
+        return float(count) / (len(s1) + len(s2))
 
-    def calculateJaccard(self, s1, s2):
-        s1 = set(s1)
-        s2 = set(s2)
+    def calculateJaccard(self, ss1, ss2):
+        s1 = set(ss1)
+        s2 = set(ss2)
         intersection = s1 & s2
         union = s1 | s2
         jaccard = float(len(intersection)) / float(len(union))
