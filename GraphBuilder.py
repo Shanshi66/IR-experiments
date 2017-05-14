@@ -98,10 +98,11 @@ class GraphBuilder:
         start_time = time.time()
         pbar = ProgressBar().start()
         graph = {}
+        rank_num = 1000
         for img in rank:
             pbar.update(float(img) / self.total * 100)
             graph[img] = {}
-            for candidate in rank[img][0:200]:
+            for candidate in rank[img][0:rank_num]:
                 set_a = self.bfs_dist(rank, img, level, k)
                 len_a = len(set_a)
                 set_b = self.bfs_dist(rank, candidate, level, k)
@@ -111,14 +112,15 @@ class GraphBuilder:
                 if len_b > min(len_a, len_b):
                     set_b = set_b[0 : min(len_a, len_b)]
                 # print len(set_a), len(set_b)
-                index_a = self.findIndex(candidate, rank[img][0:200]) + 1.0
-                index_b = self.findIndex(img, rank[candidate][0:200]) + 1.0
+                index_a = self.findIndex(candidate, rank[img][0:rank_num]) + 1.0
+                index_b = self.findIndex(img, rank[candidate][0:rank_num]) + 1.0
                 # total_order = max(index_a, index_b) + 1.0
                 # total_order = np.exp((index_a + index_b) / 400.0)
                 # total_order = (200 - index_a) * (200 - index_b) / (400 - index_a - index_b + 1.0) / 200.0
                 total_order = index_a + index_b
-                if total_order < 10: total_order = total_order / 400.0
-                else: total_order = np.exp(total_order / 400.0)
+                C = rank_num * 2.0
+                if total_order < 10: total_order = total_order / C
+                else: total_order = np.exp(total_order / C)
                 # if disorder > 120: continue
                 graph[img][candidate] = self.calculateJaccard(set_a, set_b) / total_order
                 # graph[img][candidate] = self.calculateJaccard(set_a, set_b)
