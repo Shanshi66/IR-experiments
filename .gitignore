@@ -1,5 +1,7 @@
 Data/*
 *.pyc
 log.txt
-Oxford-5k/*
-Paris/*
+*.txt
+*.dat
+*.pickle
+*.csv
